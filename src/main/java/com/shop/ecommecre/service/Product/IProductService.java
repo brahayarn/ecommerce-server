@@ -2,13 +2,15 @@ package com.shop.ecommecre.service.Product;
 
 import java.util.List;
 
+import com.shop.ecommecre.dto.request.AddProductRequest;
+import com.shop.ecommecre.dto.request.ProductUpdateRequest;
 import com.shop.ecommecre.model.Product;
 
 public interface IProductService {
-    Product addProduct(Product product);
+    Product addProduct(AddProductRequest product);
     Product getProductById(Long id);
     void deleteProduct(Long id);
-    void updateProduct(Product product, Long productId);
+    Product updateProduct(ProductUpdateRequest product, Long productId);
 
     List<Product> getAllProducts();
     List<Product> getProductsByCategory(String category);
