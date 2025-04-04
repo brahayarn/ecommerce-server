@@ -28,8 +28,8 @@ public class Image {
     private String fileType;
 
     @Lob
-    private Blob data;
-    private String url;
+    private Blob image;
+    private String downloadUrl;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
