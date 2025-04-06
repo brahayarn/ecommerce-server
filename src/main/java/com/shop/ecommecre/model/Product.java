@@ -6,6 +6,7 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,15 +35,15 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
     private List<Image> images;
 
-    public Product(String name, String brand, BigDecimal price, int inventory, String description, Category category2) {
+    public Product(String name, String brand, BigDecimal price, int inventory, String description, Category category) {
         this.name = name;
         this.brand = brand;
         this.price = price;
         this.inventory = inventory;
         this.description = description;
-        this.category = category2;
+        this.category = category;
     }
 }

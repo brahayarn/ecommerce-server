@@ -1,7 +1,6 @@
 package com.shop.ecommecre.service.Category;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -26,8 +25,9 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public Category getCategoryByName(String name) {
-        return categoryRepository.findByName(name)
+        Category category = categoryRepository.findByName(name)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with name: " + name));
+        return category;
     }
 
     @Override
@@ -37,27 +37,28 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public Category addCategory(Category category) {
-        return Optional.of(category)
-                .filter(e -> !categoryRepository.existsByName(e.getName()))
-                .map(categoryRepository::save)
-                .orElseThrow(() -> new AlreadyExistsException(category.getName() + " already exists"));
+        if (categoryRepository.existsByName(category.getName())) {
+            throw new AlreadyExistsException("Category with name '" + category.getName() + "' already exists.");
+        }
+        return categoryRepository.save(category);
     }
 
     @Override
     public Category updateCategory(Long id, Category category) {
-        return Optional.ofNullable(getCategoryById(id))
+        return categoryRepository.findById(id)
                 .map(existingCategory -> {
                     existingCategory.setName(category.getName());
                     return categoryRepository.save(existingCategory);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
-    } 
+    }
 
     @Override
     public void deleteCategory(Long id) {
-        categoryRepository.findById(id).ifPresentOrElse(categoryRepository::delete, ()-> {
-                throw new ResourceNotFoundException("Category not found with id: " + id);
-        });
+        categoryRepository.findById(id).ifPresentOrElse(
+                categoryRepository::delete,
+                () -> {
+                    throw new ResourceNotFoundException("Category not found with id: " + id);
+                });
     }
-    
 }
