@@ -2,24 +2,31 @@ package com.shop.ecommecre.service.Product;
 
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.shop.ecommecre.dto.imageDto.ImageDto;
+import com.shop.ecommecre.dto.productDto.ProductDto;
 import com.shop.ecommecre.dto.request.AddProductRequest;
 import com.shop.ecommecre.dto.request.ProductUpdateRequest;
 import com.shop.ecommecre.exceptions.ProductNotFoundException;
 import com.shop.ecommecre.model.Product;
 import com.shop.ecommecre.repository.CategoryRepository;
 import com.shop.ecommecre.repository.ProductRepository;
+import com.shop.ecommecre.repository.ImageRepository;
 
 import lombok.RequiredArgsConstructor;
 
 import com.shop.ecommecre.model.Category;
+import com.shop.ecommecre.model.Image;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService implements IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ImageRepository imageRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public Product addProduct(AddProductRequest request) {
@@ -119,4 +126,21 @@ public class ProductService implements IProductService {
     public Long countProductsByBrandAndName(String brand, String name) {
         return productRepository.countByBrandAndName(brand, name);
     }
+
+    @Override
+    public ProductDto convertToDto(Product product) {
+        ProductDto productDto = modelMapper.map(product, ProductDto.class);
+        List<Image> images = imageRepository.findByProductId(product.getId());
+        List<ImageDto> imageDtos = images.stream()
+                .map(image -> modelMapper.map(image, ImageDto.class))
+                .toList();
+        productDto.setImages(imageDtos);
+        return productDto;
+    }
+
+    @Override
+    public List<ProductDto> getConvertedProducts(List<Product> products) {
+      return products.stream().map(this::convertToDto).toList();
+    }
+
 }

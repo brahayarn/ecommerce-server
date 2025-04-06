@@ -2,6 +2,7 @@ package com.shop.ecommecre.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +25,7 @@ public class Category {
     @Column(unique = true)
     private String name;
 
+    @JsonIgnore // To avoid circular reference when converting to JSON
     @OneToMany(mappedBy = "category")
     private List<Product> products;
 

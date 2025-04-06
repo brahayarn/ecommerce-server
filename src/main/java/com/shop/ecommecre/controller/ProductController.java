@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.ResourceAccessException;
 
+import com.shop.ecommecre.dto.productDto.ProductDto;
 import com.shop.ecommecre.dto.request.AddProductRequest;
 import com.shop.ecommecre.dto.request.ProductUpdateRequest;
 import com.shop.ecommecre.dto.response.api;
@@ -33,7 +34,8 @@ public class ProductController {
     public ResponseEntity<api> getAllProducts() {
         try {
             List<Product> products = productService.getAllProducts();
-            return ResponseEntity.ok(new api("Products retrieved successfully", products));
+            List<ProductDto> productDtos = productService.getConvertedProducts(products);
+            return ResponseEntity.ok(new api("Products retrieved successfully", productDtos));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new api("Failed to retrieve products", null));
         }
@@ -43,7 +45,8 @@ public class ProductController {
     public ResponseEntity<api> getProductById(@PathVariable Long productId) {
         try {
             Product product = productService.getProductById(productId);
-            return ResponseEntity.ok(new api("Product retrieved successfully", product));
+            ProductDto productDto = productService.convertToDto(product);
+            return ResponseEntity.ok(new api("Product retrieved successfully", productDto));
         } catch (ResourceAccessException e) {
             return ResponseEntity.status(404).body(new api("Failed to retrieve product", null));
         }
@@ -63,7 +66,8 @@ public class ProductController {
     public ResponseEntity<api> updateProduct(@RequestBody ProductUpdateRequest product, @PathVariable Long productId) {
         try {
             Product updatedProduct = productService.updateProduct(product, productId);
-            return ResponseEntity.ok(new api("Product updated successfully", updatedProduct));
+            ProductDto productDto = productService.convertToDto(updatedProduct);
+            return ResponseEntity.ok(new api("Product updated successfully", productDto));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(500).body(new api("Failed to update product", null));
         }
@@ -86,7 +90,8 @@ public class ProductController {
             if (products.isEmpty()) {
                 return ResponseEntity.status(404).body(new api("No products found", null));
             }
-            return ResponseEntity.ok(new api("Products retrieved successfully", products));
+            List<ProductDto> productDtos = productService.getConvertedProducts(products);
+            return ResponseEntity.ok(new api("Products retrieved successfully", productDtos));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new api("Failed to retrieve products", null));
         }

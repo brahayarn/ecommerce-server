@@ -2,6 +2,7 @@ package com.shop.ecommecre.service.Product;
 
 import java.util.List;
 
+import com.shop.ecommecre.dto.productDto.ProductDto;
 import com.shop.ecommecre.dto.request.AddProductRequest;
 import com.shop.ecommecre.dto.request.ProductUpdateRequest;
 import com.shop.ecommecre.model.Product;
@@ -20,4 +21,7 @@ public interface IProductService {
     List<Product> getProductsByBrandAndName(String brand, String name);
 
     Long countProductsByBrandAndName(String brand, String name);
+
+    List<ProductDto> getConvertedProducts(List<Product> products);
+    ProductDto convertToDto(Product product);
 }
