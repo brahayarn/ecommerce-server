@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,6 +26,10 @@ public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Version
+    private Integer version = 0; 
+
     private BigDecimal totalAmount = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -45,11 +50,8 @@ public class Cart {
     private void updateTotalAmount() {
         this.totalAmount = items.stream().map(item -> {
             BigDecimal pricePerItem = item.getTotalPrice();
-            if (pricePerItem == null) {
-                return  BigDecimal.ZERO;
-            }
-            return pricePerItem.multiply(BigDecimal.valueOf(item.getQuantity()));
+            return (pricePerItem == null ? BigDecimal.ZERO : pricePerItem).multiply(BigDecimal.valueOf(item.getQuantity()));
         }).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-    
+
 }

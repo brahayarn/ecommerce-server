@@ -10,6 +10,7 @@ import com.shop.ecommecre.model.Cart;
 import com.shop.ecommecre.repository.CartItemRepository;
 import com.shop.ecommecre.repository.CartRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -17,24 +18,25 @@ import lombok.RequiredArgsConstructor;
 public class CartService implements ICartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
-    private final AtomicLong cartIdGenerator = new AtomicLong(0);   
+    private final AtomicLong cartIdGenerator = new AtomicLong(0);
 
     @Override
     public Cart getCartById(Long id) {
         Cart cart = cartRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
         BigDecimal totalAmount = cart.getTotalAmount();
         cart.setTotalAmount(totalAmount);
         return cartRepository.save(cart);
     }
 
+    @Transactional
     @Override
     public void clearCart(Long id) {
         Cart cart = getCartById(id);
         cartItemRepository.deleteByCartId(id);
         cart.getItems().clear();
         cartRepository.deleteById(id);
-        
+
     }
 
     @Override
@@ -43,12 +45,11 @@ public class CartService implements ICartService {
         return cart.getTotalAmount();
     }
 
+
     @Override
     public Long initialNewCart() {
-        Cart cart = new Cart();
-        Long cartId = cartIdGenerator.incrementAndGet();
-        cart.setId(cartId);
+        Cart cart = new Cart(); 
         return cartRepository.save(cart).getId();
     }
-    
+
 }
