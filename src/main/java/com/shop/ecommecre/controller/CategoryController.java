@@ -22,7 +22,7 @@ import com.shop.ecommecre.model.Category;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("${api.base.path}categories")
+@RequestMapping("${api.base.path}/categories")
 public class CategoryController {
     private final ICategoryService categoryService;
 
