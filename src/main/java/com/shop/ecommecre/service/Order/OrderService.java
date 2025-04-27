@@ -5,8 +5,10 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.shop.ecommecre.dto.orderDto.OrderDto;
 import com.shop.ecommecre.enums.OrderStatus;
 import com.shop.ecommecre.exceptions.ResourceNotFoundException;
 import com.shop.ecommecre.model.Cart;
@@ -25,6 +27,7 @@ public class OrderService implements IOrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final CartService cartService;
+    private final ModelMapper modelMapper;
 
     // Implement the methods from IOrderService interface
     @Override
@@ -71,14 +74,21 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public Order getOrder(Long orderId) {
-        // Implementation here
-        return orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+    public OrderDto getOrder(Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(this::convertToDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
     }
 
     @Override
-    public List<Order> getOrdersByUserId(Long userId) {
-        return orderRepository.findByUserId(userId);
+    public List<OrderDto> getOrdersByUserId(Long userId) {
+        List<Order> orders = orderRepository.findByUserId(userId);
+        return orders.stream()
+                .map(this::convertToDto)
+                .toList();
     }
-
+    
+    private OrderDto convertToDto(Order order) {
+        return modelMapper.map(order, OrderDto.class);
+    };
 }

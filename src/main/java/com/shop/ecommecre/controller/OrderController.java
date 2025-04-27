@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shop.ecommecre.dto.orderDto.OrderDto;
 import com.shop.ecommecre.dto.response.api;
 import com.shop.ecommecre.exceptions.ResourceNotFoundException;
 import com.shop.ecommecre.model.Order;
@@ -37,7 +38,7 @@ public class OrderController {
     @GetMapping("/{orderId}/get")
     public ResponseEntity<api> getOrderById(@PathVariable Long orderId) {
         try {
-            Order order = orderService.getOrder(orderId);
+            OrderDto order = orderService.getOrder(orderId);
             return ResponseEntity.ok(new api("Item Order Success!", order));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(404).body(new api("Error Occured!", e.getMessage()));
@@ -47,7 +48,7 @@ public class OrderController {
     @GetMapping("/{userId}/order")
     public ResponseEntity<api> getOrdersByUserId(@PathVariable Long userId) {
         try {
-            List<Order> order = orderService.getOrdersByUserId(userId);
+            List<OrderDto> order = orderService.getOrdersByUserId(userId);
             return ResponseEntity.ok(new api("Item Order Success!", order));
         } catch (ResourceNotFoundException e) {
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new api("Error Occured!", e.getMessage()));
