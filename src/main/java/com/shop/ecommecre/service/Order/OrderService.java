@@ -2,6 +2,7 @@ package com.shop.ecommecre.service.Order;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import com.shop.ecommecre.model.OrderItem;
 import com.shop.ecommecre.model.Product;
 import com.shop.ecommecre.repository.OrderRepository;
 import com.shop.ecommecre.repository.ProductRepository;
+import com.shop.ecommecre.service.Cart.CartService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,12 +24,20 @@ import lombok.RequiredArgsConstructor;
 public class OrderService implements IOrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final CartService cartService;
 
     // Implement the methods from IOrderService interface
     @Override
     public Order createOrder(Long userId) {
-        // Implementation here
-        return null;
+        Cart cart = cartService.getCartByUserId(userId);
+        Order order = createOrder(cart);
+        List<OrderItem> orderItemList = createOrderItem(order, cart);
+        order.setOrderItems(new HashSet<>(orderItemList));
+        order.setTotalAmount(calculateTotalAmount(orderItemList));
+        Order savedOrder = orderRepository.save(order);
+
+        cartService.clearCart(cart.getId());
+        return savedOrder;
     }
 
     private List<OrderItem> createOrderItem(Order order, Cart cart) {
@@ -46,7 +56,7 @@ public class OrderService implements IOrderService {
 
     private Order createOrder(Cart cart) {
         Order order = new Order();
-        //TO DO set the user
+        order.setUser(cart.getUser());
         order.setOrderStatus(OrderStatus.PENDING);
         order.setOrderDate(LocalDate.now());
         return order;
@@ -64,6 +74,11 @@ public class OrderService implements IOrderService {
     public Order getOrder(Long orderId) {
         // Implementation here
         return orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+    }
+
+    @Override
+    public List<Order> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId);
     }
 
 }
