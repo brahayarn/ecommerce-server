@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.ecommecre.dto.response.api;
 import com.shop.ecommecre.exceptions.ResourceNotFoundException;
+import com.shop.ecommecre.model.Cart;
+import com.shop.ecommecre.model.User;
 import com.shop.ecommecre.service.Cart.ICartService;
 import com.shop.ecommecre.service.Cart.CartItem.ICartItemService;
+import com.shop.ecommecre.service.User.IUserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,14 +27,14 @@ import lombok.RequiredArgsConstructor;
 public class CartItemController {
     private final ICartItemService cartItemService;
     private final ICartService cartService;
+    private final IUserService userService;
 
     @PostMapping("/add")
-    public ResponseEntity<api> addItemToCart(@RequestParam(required = false) Long cartId,@RequestParam Long productId,@RequestParam int quantity) {
+    public ResponseEntity<api> addItemToCart(@RequestParam Long productId,@RequestParam int quantity) {
         try{
-        if ( cartId == null) {
-            cartId= cartService.initialNewCart();
-        }
-        cartItemService.addItemToCart(cartId, productId, quantity);
+            User user = userService.getUserById(4L);
+            Cart cart = cartService.initialNewCart(user);
+        cartItemService.addItemToCart(cart.getId(), productId, quantity);
         return ResponseEntity.ok(new api("Item added to cart", null));
         }
         catch (ResourceNotFoundException e) {
