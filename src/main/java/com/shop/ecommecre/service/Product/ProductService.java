@@ -9,6 +9,7 @@ import com.shop.ecommecre.dto.imageDto.ImageDto;
 import com.shop.ecommecre.dto.productDto.ProductDto;
 import com.shop.ecommecre.dto.request.AddProductRequest;
 import com.shop.ecommecre.dto.request.ProductUpdateRequest;
+import com.shop.ecommecre.exceptions.AlreadyExistsException;
 import com.shop.ecommecre.exceptions.ProductNotFoundException;
 import com.shop.ecommecre.model.Product;
 import com.shop.ecommecre.repository.CategoryRepository;
@@ -34,7 +35,10 @@ public class ProductService implements IProductService {
         // If Yes, set it as the new product category
         // If No, save it as a new category
         // and set it as the new product category.
-        
+        if (productExists(request.getName(), request.getBrand())) {
+            throw new AlreadyExistsException(request.getBrand() + " "
+                    + request.getName() + " already exists, you may update this product instead!");
+        }
         Category category = categoryRepository.findByName(request.getCategory().getName())
                 .orElseGet(() -> {
                     Category newCategory = new Category(request.getCategory().getName());
@@ -43,6 +47,10 @@ public class ProductService implements IProductService {
         
         request.setCategory(category);
         return productRepository.save(createProduct(request, category));
+    }
+
+    private boolean productExists(String name , String brand) {
+        return productRepository.existsByNameAndBrand(name, brand);
     }
 
     private Product createProduct(AddProductRequest request, Category category) {

@@ -29,7 +29,8 @@ public class OrderController {
     public ResponseEntity<api> createOrder(@RequestParam Long userId) {
          try {
             Order order =  orderService.createOrder(userId);
-            return ResponseEntity.ok(new api("Item Order Success!", order));
+            OrderDto orderDto = orderService.convertToDto(order);
+            return ResponseEntity.ok(new api("Item Order Success!", orderDto));
         } catch (Exception e) {
             return  ResponseEntity.status(500).body(new api("Error Occured!", e.getMessage()));
         }

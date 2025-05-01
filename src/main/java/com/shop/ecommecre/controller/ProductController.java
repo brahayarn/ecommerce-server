@@ -18,6 +18,7 @@ import com.shop.ecommecre.dto.productDto.ProductDto;
 import com.shop.ecommecre.dto.request.AddProductRequest;
 import com.shop.ecommecre.dto.request.ProductUpdateRequest;
 import com.shop.ecommecre.dto.response.api;
+import com.shop.ecommecre.exceptions.AlreadyExistsException;
 import com.shop.ecommecre.exceptions.ResourceNotFoundException;
 import com.shop.ecommecre.model.Product;
 import com.shop.ecommecre.service.Product.IProductService;
@@ -56,9 +57,10 @@ public class ProductController {
     public ResponseEntity<api> addProduct(@RequestBody AddProductRequest product) {
         try {
             Product newProduct = productService.addProduct(product);
-            return ResponseEntity.status(201).body(new api("Product added successfully", newProduct));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(new api("Failed to add product", null));
+            ProductDto productDto = productService.convertToDto(newProduct);
+            return ResponseEntity.status(201).body(new api("Product added successfully", productDto));
+        } catch (AlreadyExistsException e) {
+            return ResponseEntity.status(409).body(new api(e.getMessage(), null));
         }
     }
 

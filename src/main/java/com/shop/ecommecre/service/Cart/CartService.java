@@ -1,12 +1,14 @@
 package com.shop.ecommecre.service.Cart;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
 
 import com.shop.ecommecre.exceptions.ResourceNotFoundException;
 import com.shop.ecommecre.model.Cart;
+import com.shop.ecommecre.model.User;
 import com.shop.ecommecre.repository.CartItemRepository;
 import com.shop.ecommecre.repository.CartRepository;
 
@@ -47,9 +49,13 @@ public class CartService implements ICartService {
 
 
     @Override
-    public Long initialNewCart() {
-        Cart cart = new Cart(); 
-        return cartRepository.save(cart).getId();
+    public Cart initialNewCart(User user) {
+        return Optional.ofNullable(getCartByUserId(user.getId()))
+                .orElseGet(() -> {
+                    Cart cart = new Cart();
+                    cart.setUser(user);
+                    return cartRepository.save(cart);
+                });
     }
 
     @Override

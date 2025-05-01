@@ -31,7 +31,8 @@ public class UserController {
     public ResponseEntity<api> getUserById(@PathVariable Long userId) {
         try {
             User user = userService.getUserById(userId);
-            return ResponseEntity.ok(new api("Success", user));
+            UserDto userDto = userService.convertUserToDto(user);
+            return ResponseEntity.ok(new api("Success", userDto));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(404).body(new api(e.getMessage(), null));
         }
