@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -87,7 +88,7 @@ public class OrderService implements IOrderService {
                 .map(this::convertToDto)
                 .toList();
     }
-    
+
     @Override
     public OrderDto convertToDto(Order order) {
         return modelMapper.map(order, OrderDto.class);
@@ -101,6 +102,13 @@ public class OrderService implements IOrderService {
         order.setOrderStatus(status);
         orderRepository.save(order);
 
-        return modelMapper.map(order, OrderDto.class); 
+        return modelMapper.map(order, OrderDto.class);
     }
+
+    @Override
+    public List<OrderDto> getAllOrders() {
+        List<Order> orders = orderRepository.findAll(); 
+        return orders.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
 }

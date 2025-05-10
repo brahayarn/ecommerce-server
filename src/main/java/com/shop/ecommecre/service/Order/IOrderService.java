@@ -12,4 +12,5 @@ public interface IOrderService {
     List<OrderDto> getOrdersByUserId(Long userId);
     OrderDto convertToDto(Order order);
     OrderDto updateOrderStatus(Long orderId, OrderStatus status);
+    List<OrderDto> getAllOrders();
 }
