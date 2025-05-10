@@ -92,4 +92,15 @@ public class OrderService implements IOrderService {
     public OrderDto convertToDto(Order order) {
         return modelMapper.map(order, OrderDto.class);
     };
+
+    @Override
+    public OrderDto updateOrderStatus(Long orderId, OrderStatus status) throws ResourceNotFoundException {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+
+        order.setOrderStatus(status);
+        orderRepository.save(order);
+
+        return modelMapper.map(order, OrderDto.class); 
+    }
 }
