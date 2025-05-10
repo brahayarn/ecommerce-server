@@ -4,15 +4,18 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.ecommecre.dto.orderDto.OrderDto;
 import com.shop.ecommecre.dto.response.api;
+import com.shop.ecommecre.enums.OrderStatus;
 import com.shop.ecommecre.exceptions.ResourceNotFoundException;
 import com.shop.ecommecre.model.Order;
 import com.shop.ecommecre.service.Order.IOrderService;
@@ -27,12 +30,12 @@ public class OrderController {
 
     @PostMapping("/create")
     public ResponseEntity<api> createOrder(@RequestParam Long userId) {
-         try {
-            Order order =  orderService.createOrder(userId);
+        try {
+            Order order = orderService.createOrder(userId);
             OrderDto orderDto = orderService.convertToDto(order);
             return ResponseEntity.ok(new api("Item Order Success!", orderDto));
         } catch (Exception e) {
-            return  ResponseEntity.status(500).body(new api("Error Occured!", e.getMessage()));
+            return ResponseEntity.status(500).body(new api("Error Occured!", e.getMessage()));
         }
     }
 
@@ -52,7 +55,24 @@ public class OrderController {
             List<OrderDto> order = orderService.getOrdersByUserId(userId);
             return ResponseEntity.ok(new api("Item Order Success!", order));
         } catch (ResourceNotFoundException e) {
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new api("Error Occured!", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new api("Error Occured!", e.getMessage()));
         }
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<api> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestParam OrderStatus status) {
+        try {
+            OrderDto updatedOrder = orderService.updateOrderStatus(orderId, status);
+            return ResponseEntity.ok(new api("Order status updated successfully!", updatedOrder));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new api("Error occurred!", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new api("Error occurred!", e.getMessage()));
+        }
+    }
+
 }
