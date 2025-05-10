@@ -19,6 +19,7 @@ import com.shop.ecommecre.service.Cart.ICartService;
 import com.shop.ecommecre.service.Cart.CartItem.ICartItemService;
 import com.shop.ecommecre.service.User.IUserService;
 
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -32,13 +33,16 @@ public class CartItemController {
     @PostMapping("/add")
     public ResponseEntity<api> addItemToCart(@RequestParam Long productId,@RequestParam int quantity) {
         try{
-            User user = userService.getUserById(4L);
+            User user = userService.getAuthenticatedUser();
             Cart cart = cartService.initialNewCart(user);
         cartItemService.addItemToCart(cart.getId(), productId, quantity);
         return ResponseEntity.ok(new api("Item added to cart", null));
         }
         catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(400).body(new api("Error", e.getMessage()));
+            return ResponseEntity.status(404).body(new api("Error", e.getMessage()));
+        } 
+        catch (JwtException e) {
+            return ResponseEntity.status(401).body(new api("Error", e.getMessage()));
         }
     }
 

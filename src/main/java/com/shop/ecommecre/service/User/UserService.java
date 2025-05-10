@@ -3,6 +3,9 @@ package com.shop.ecommecre.service.User;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.shop.ecommecre.dto.request.CreateUserRequest;
@@ -20,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public User getUserById(Long userId) {
@@ -29,21 +33,21 @@ public class UserService implements IUserService {
 
     @Override
     public User createUser(CreateUserRequest userRequest) {
-        return  Optional.of(userRequest)
+        return Optional.of(userRequest)
                 .filter(user -> !userRepository.existsByEmail(userRequest.getEmail()))
                 .map(request -> {
                     User user = new User();
                     user.setEmail(userRequest.getEmail());
-                    user.setPassword(userRequest.getPassword());
+                    user.setPassword(passwordEncoder.encode(request.getPassword()));
                     user.setFirstName(userRequest.getFirstName());
                     user.setLastName(userRequest.getLastName());
-                    return  userRepository.save(user);
-                }) .orElseThrow(() -> new AlreadyExistsException("Oops!" +userRequest.getEmail() +" already exists!"));
+                    return userRepository.save(user);
+                }).orElseThrow(() -> new AlreadyExistsException("Oops!" + userRequest.getEmail() + " already exists!"));
     }
 
     @Override
     public User updateUser(Long userId, UpdateUserRequest userRequest) {
-        return  userRepository.findById(userId).map(existingUser ->{
+        return userRepository.findById(userId).map(existingUser -> {
             existingUser.setFirstName(userRequest.getFirstName());
             existingUser.setLastName(userRequest.getLastName());
             return userRepository.save(existingUser);
@@ -60,5 +64,12 @@ public class UserService implements IUserService {
     @Override
     public UserDto convertUserToDto(User user) {
         return modelMapper.map(user, UserDto.class);
+    }
+
+    @Override
+    public User getAuthenticatedUser() {
+        Authentication authentication  = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        return userRepository.findByEmail(email);
     }
 }
