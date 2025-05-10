@@ -3,6 +3,7 @@ package com.shop.ecommecre.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,7 @@ import com.shop.ecommecre.dto.productDto.ProductDto;
 import com.shop.ecommecre.dto.request.AddProductRequest;
 import com.shop.ecommecre.dto.request.ProductUpdateRequest;
 import com.shop.ecommecre.dto.response.api;
+import com.shop.ecommecre.exceptions.AlreadyExistsException;
 import com.shop.ecommecre.exceptions.ResourceNotFoundException;
 import com.shop.ecommecre.model.Product;
 import com.shop.ecommecre.service.Product.IProductService;
@@ -52,16 +54,19 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<api> addProduct(@RequestBody AddProductRequest product) {
         try {
             Product newProduct = productService.addProduct(product);
-            return ResponseEntity.status(201).body(new api("Product added successfully", newProduct));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(new api("Failed to add product", null));
+            ProductDto productDto = productService.convertToDto(newProduct);
+            return ResponseEntity.status(201).body(new api("Product added successfully", productDto));
+        } catch (AlreadyExistsException e) {
+            return ResponseEntity.status(409).body(new api(e.getMessage(), null));
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/update/{productId}")
     public ResponseEntity<api> updateProduct(@RequestBody ProductUpdateRequest product, @PathVariable Long productId) {
         try {
@@ -73,6 +78,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/delete/{productId}")
     public ResponseEntity<api> deleteProduct(@PathVariable Long productId) {
         try {
