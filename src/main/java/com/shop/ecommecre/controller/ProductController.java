@@ -3,6 +3,7 @@ package com.shop.ecommecre.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +54,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<api> addProduct(@RequestBody AddProductRequest product) {
         try {
@@ -64,6 +66,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/update/{productId}")
     public ResponseEntity<api> updateProduct(@RequestBody ProductUpdateRequest product, @PathVariable Long productId) {
         try {
@@ -75,6 +78,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/delete/{productId}")
     public ResponseEntity<api> deleteProduct(@PathVariable Long productId) {
         try {
