@@ -91,8 +91,19 @@ public class OrderService implements IOrderService {
 
     @Override
     public OrderDto convertToDto(Order order) {
-        return modelMapper.map(order, OrderDto.class);
-    };
+        OrderDto dto = modelMapper.map(order, OrderDto.class);
+
+        if (order.getUser() != null) {
+            dto.setUserEmail(order.getUser().getEmail());
+            dto.setUserId(order.getUser().getId());
+        }
+
+        if (order.getOrderStatus() != null) {
+            dto.setStatus(order.getOrderStatus().name());
+        }
+
+        return dto;
+    }
 
     @Override
     public OrderDto updateOrderStatus(Long orderId, OrderStatus status) throws ResourceNotFoundException {
@@ -107,7 +118,7 @@ public class OrderService implements IOrderService {
 
     @Override
     public List<OrderDto> getAllOrders() {
-        List<Order> orders = orderRepository.findAll(); 
+        List<Order> orders = orderRepository.findAll();
         return orders.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
